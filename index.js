@@ -81,10 +81,10 @@ async function fetchPage(url) {
 }
 
 async function fetchCSS(index) {
-  const html = document.documentElement.innerHTML;
+  const htmlPage = document.documentElement.innerHTML;
   let cssRegex =
     /https:\/\/[a-zA-Z]+-[a-zA-Z]+\.[a-zA-Z]+-[a-zA-Z]+\.com\/[A-Za-z0-9]+\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css/i;
-  const cssMatch = index.match(cssRegex);
+  const cssMatch = htmlPage.match(cssRegex);
   if (!cssMatch) {
     throw new Error('CSS file not found');
   }
