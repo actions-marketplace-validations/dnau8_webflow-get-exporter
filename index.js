@@ -81,15 +81,14 @@ async function fetchPage(url) {
 }
 
 async function fetchCSS(index) {
-  const htmlPage = document.documentElement.innerHTML;
   let cssRegex =
     /https:\/\/[a-zA-Z]+-[a-zA-Z]+\.[a-zA-Z]+-[a-zA-Z]+\.com\/[A-Za-z0-9]+\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css/i;
-  const cssMatch = htmlPage.match(cssRegex);
+  const cssMatch = index.match(cssRegex);
   if (!cssMatch) {
     throw new Error('CSS not found');
   }
 
-  const cssURL = cssMatch;
+  const cssURL = cssMatch[0];
 
   const response = await fetch(cssURL);
 
