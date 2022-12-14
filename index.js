@@ -140,7 +140,7 @@ function formatHTML (html) {
   html = html.substring(0, start) + html.substring(end)
 
   // Remove the style hash
-  html = html.replace(/(?<=<link href=")(.*\/.*\.webflow\.[a-z0-9]+(?:\.min)?\.css)(?=".*\/>)/, './style.css')
+  html = html.replace(/(?<=<link href="([A-Za-z0-9]+:\/\/[a-zA-Z]+-[A-Za-z0-9]+\.[a-zA-Z]+-[a-zA-Z]+\.[a-zA-Z]+\/([0-9]+([a-zA-Z]+[0-9]+)+)\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css)(?=".*\/>)/, './style.css')
 
   return html
 }
