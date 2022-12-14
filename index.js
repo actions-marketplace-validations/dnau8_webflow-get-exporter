@@ -1,196 +1,190 @@
-const core = require('@actions/core');
-const YAML = require('yaml');
-const picomatch = require('picomatch');
-const fetch = require('node-fetch');
-const prettier = require('prettier');
-const fs = require('fs').promises;
+const core = require('@actions/core')
+const YAML = require('yaml')
+const picomatch = require('picomatch')
+const fetch = require('node-fetch')
+const prettier = require('prettier')
+const fs = require('fs').promises
 
-async function init() {
-  const repositoryName = process.env.GITHUB_REPOSITORY.replace(/^[^/]*\//, '');
+async function init () {
+  const repositoryName = process.env.GITHUB_REPOSITORY.replace(/^[^/]*\//, '')
 
   const config = {
     site: repositoryName.includes('.') ? `https://${repositoryName}` : '',
-    pages: true,
-  };
-
-  const configFile = await readFile('webflowgit.yml');
-  Object.assign(config, YAML.parse(configFile));
-
-  if (config.pages) {
-    const ignorePage = picomatch(config.pages.ignore || []);
-    config.pages = {
-      valid: (page) => !ignorePage(page),
-    };
+    pages: true
   }
 
-  return config;
-}
-
-async function processSite(config) {
-  const site = config.site;
-  console.log(`Processing site ${site}`);
-
-  let index = await fetchPage(site);
-
-  let css = await fetchCSS(index);
-  css = formatCSS(css);
-  await writeFile('style.css', css);
+  const configFile = await readFile('webflowgit.yml')
+  Object.assign(config, YAML.parse(configFile))
 
   if (config.pages) {
-    console.log('Fetching pages');
+    const ignorePage = picomatch(config.pages.ignore || [])
+    config.pages = {
+      valid: page => !ignorePage(page)
+    }
+  }
+
+  return config
+}
+
+async function processSite (config) {
+  const site = config.site
+  console.log(`Processing site ${site}`)
+
+  let index = await fetchPage(site)
+
+  let css = await fetchCSS(index)
+  css = formatCSS(css)
+  await writeFile('style.css', css)
+
+  if (config.pages) {
+    console.log('Fetching pages')
 
     if (config.pages.valid('/index')) {
-      index = formatHTML(index);
-      await writeFile('index.html', index);
+      index = formatHTML(index)
+      await writeFile('index.html', index)
     }
 
-    const sitemap = await fetchSitemap(site);
+    const sitemap = await fetchSitemap(site)
     if (!sitemap) {
-      console.log('No sitemap.xml, skipping fetching pages');
-      return;
+      console.log('No sitemap.xml, skipping fetching pages')
+      return
     }
 
-    const pages = getPages(site, sitemap).filter((page) =>
-      config.pages.valid(`/${page}`)
-    );
+    const pages = getPages(site, sitemap)
+      .filter(page => config.pages.valid(`/${page}`))
 
-    await Promise.all(pages.map((page) => processPage(site, page)));
+    await Promise.all(pages.map(page => processPage(site, page)))
   }
 }
 
-async function processPage(site, page) {
+async function processPage (site, page) {
   try {
-    let html = await fetchPage(`${site}/${page}`);
-    html = formatHTML(html);
-    await assurePathExists(page);
-    await writeFile(`${page}.html`, html);
+    let html = await fetchPage(`${site}/${page}`)
+    html = formatHTML(html)
+    await assurePathExists(page)
+    await writeFile(`${page}.html`, html)
   } catch (error) {
-    console.error(`Failed processing page: ${error.message}`, error);
+    console.error(`Failed processing page: ${error.message}`, error)
   }
 }
 
-async function fetchPage(url) {
-  const response = await fetch(url);
+async function fetchPage (url) {
+  const response = await fetch(url)
 
   if (!response.ok) {
-    throw new Error(`${response.status}: ${response.statusText}`);
+    throw new Error(`${response.status}: ${response.statusText}`)
   }
 
-  const body = await response.text();
-  return body;
+  const body = await response.text()
+  return body
 }
 
-async function fetchCSS(index) {
-  let cssRegex =
-    /https:\/\/[a-zA-Z]+-[a-zA-Z]+\.[a-zA-Z]+-[a-zA-Z]+\.com\/[A-Za-z0-9]+\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css/i;
-  const cssMatch = index.match(cssRegex);
+async function fetchCSS (index) {
+  const regex = /<link href="(https:\/\/assets-global\.website-files\.com\/[A-Za-z0-9]+\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css)" rel="stylesheet" type="text\/css">/i;
+  const cssMatch = index.match(regex)
   if (!cssMatch) {
-    throw new Error('CSS not found');
+    throw new Error('CSS file not found')
   }
 
-  const cssURL = cssMatch[0];
+  const cssURL = cssMatch[1]
 
-  const response = await fetch(cssURL);
+  const response = await fetch(cssURL)
 
   if (!response.ok) {
-    throw new Error(`${response.status}: ${response.statusText}`);
+    throw new Error(`${response.status}: ${response.statusText}`)
   }
 
-  const css = await response.text();
-  return css;
+  const css = await response.text()
+  return css
 }
 
-async function fetchSitemap(site) {
-  const response = await fetch(`${site}/sitemap.xml`);
+async function fetchSitemap (site) {
+  const response = await fetch(`${site}/sitemap.xml`)
 
   if (!response.ok) {
     if (response.status === 404) {
-      return null;
+      return null
     }
-    throw new Error(`${response.status}: ${response.statusText}`);
+    throw new Error(`${response.status}: ${response.statusText}`)
   }
 
-  const sitemap = await response.text();
-  return sitemap;
+  const sitemap = await response.text()
+  return sitemap
 }
 
-function getPages(site, sitemap) {
-  let pages = [...sitemap.matchAll(/<loc>(.*)<\/loc>/g)];
+function getPages (site, sitemap) {
+  let pages = [...sitemap.matchAll(/<loc>(.*)<\/loc>/g)]
 
-  pages = pages
-    .map((m) => m[1])
-    .map((url) => url.substring(site.length).replace(/^\/|\/$/g, ''))
-    .filter((page) => page);
+  pages = pages.map(m => m[1])
+    .map(url => url.substring(site.length).replace(/^\/|\/$/g, ''))
+    .filter(page => page)
 
-  return pages;
+  return pages
 }
 
-function formatCSS(css) {
-  css = prettier.format(css, { parser: 'css' });
+function formatCSS (css) {
+  css = prettier.format(css, { parser: 'css' })
 
   // Cut the timestamp line
-  css = css.substring(css.indexOf('\n') + 1);
+  css = css.substring(css.indexOf('\n') + 1)
 
-  return css;
+  return css
 }
 
-function formatHTML(html) {
-  html = prettier.format(html, { parser: 'html', printWidth: 200 });
+function formatHTML (html) {
+  html = prettier.format(html, { parser: 'html', printWidth: 200 })
 
   // Cut the timestamp line
-  const start = html.indexOf('\n') + 1;
-  const end = html.indexOf('\n', start) + 1;
-  html = html.substring(0, start) + html.substring(end);
+  const start = html.indexOf('\n') + 1
+  const end = html.indexOf('\n', start) + 1
+  html = html.substring(0, start) + html.substring(end)
 
   // Remove the style hash
-  html = html.replace(
-    /(?<=<link href=")(.*\/.*\.webflow\.[a-z0-9]+(?:\.min)?\.css)(?=".*\/>)/,
-    './style.css'
-  );
+  html = html.replace(/(?<=<link href=")(.*\/.*\.webflow\.[a-z0-9]+(?:\.min)?\.css)(?=".*\/>)/, './style.css')
 
-  return html;
+  return html
 }
 
-async function assurePathExists(path) {
-  let parts = path.split('/').filter((part) => part);
-  parts = parts.slice(0, parts.length - 1);
+async function assurePathExists (path) {
+  let parts = path.split('/').filter(part => part)
+  parts = parts.slice(0, parts.length - 1)
 
-  let current = '';
+  let current = ''
 
   for (const part of parts) {
-    current += `/${part}`;
+    current += `/${part}`
     try {
-      await fs.access(`${process.env.GITHUB_WORKSPACE}/${current}`);
+      await fs.access(`${process.env.GITHUB_WORKSPACE}/${current}`)
     } catch {
-      await fs.mkdir(`${process.env.GITHUB_WORKSPACE}/${current}`);
+      await fs.mkdir(`${process.env.GITHUB_WORKSPACE}/${current}`)
     }
   }
 }
 
-async function readFile(name) {
-  return await fs.readFile(`${process.env.GITHUB_WORKSPACE}/${name}`, 'utf8');
+async function readFile (name) {
+  return await fs.readFile(`${process.env.GITHUB_WORKSPACE}/${name}`, 'utf8')
 }
 
-async function writeFile(name, content) {
-  await fs.writeFile(`${process.env.GITHUB_WORKSPACE}/${name}`, content);
+async function writeFile (name, content) {
+  await fs.writeFile(`${process.env.GITHUB_WORKSPACE}/${name}`, content)
 }
 
-async function main() {
-  const config = await init();
+async function main () {
+  const config = await init()
 
   if (!config.site) {
-    console.log('Missing site, skipping');
-    return;
+    console.log('Missing site, skipping')
+    return
   }
 
-  await processSite(config);
+  await processSite(config)
 }
 
 main()
   .then(() => {
-    console.log('Executed successfully');
+    console.log('Executed successfully')
   })
   .catch((error) => {
-    console.error(error);
-    core.setFailed(error.message);
-  });
+    console.error(error)
+    core.setFailed(error.message)
+  })
