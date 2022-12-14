@@ -80,7 +80,8 @@ async function fetchPage (url) {
 }
 
 async function fetchCSS (index) {
-  const cssMatch = index.match(/<link href="(.*\/.*\.webflow\.[a-z0-9]+(?:\.min)?\.css)".*\/>/)
+
+  const cssMatch = index.match(/<link href="([A-Za-z0-9]+:\/\/[a-zA-Z]+-[A-Za-z0-9]+\.[a-zA-Z]+-[a-zA-Z]+\.[a-zA-Z]+\/([0-9]+([a-zA-Z]+[0-9]+)+)\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css)".*\/>/)
   if (!cssMatch) {
     throw new Error('CSS file not found')
   }
