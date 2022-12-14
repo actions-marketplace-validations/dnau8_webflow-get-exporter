@@ -80,13 +80,12 @@ async function fetchPage (url) {
 }
 
 async function fetchCSS (index) {
-  const regex = /<link href="(https:\/\/assets-global\.website-files\.com\/[A-Za-z0-9]+\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css)" rel="stylesheet" type="text\/css">/i;
-  const cssMatch = index.match(regex)
+  const cssMatch = index.match(/https:\/\/assets-global.website-files.com\/[a-z0-9]+\/[a-z0-9]+\/.+/)
   if (!cssMatch) {
     throw new Error('CSS file not found')
   }
 
-  const cssURL = cssMatch[1]
+  const cssURL = cssMatch;
 
   const response = await fetch(cssURL)
 

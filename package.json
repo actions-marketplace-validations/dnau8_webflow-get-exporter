@@ -4,7 +4,7 @@
   "description": "> GitHub action to fetch Webflow site content.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,5 @@
     "picomatch": "^2.3.0",
     "prettier": "^2.3.2",
     "yaml": "^1.10.2"
-  },
-  "devDependencies": {}
+  }
 }
