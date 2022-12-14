@@ -80,13 +80,12 @@ async function fetchPage (url) {
 }
 
 async function fetchCSS (index) {
-
-  const cssMatch = index.match(/<link href="([A-Za-z0-9]+:\/\/[a-zA-Z]+-[A-Za-z0-9]+\.[a-zA-Z]+-[a-zA-Z]+\.[a-zA-Z]+\/([0-9]+([a-zA-Z]+[0-9]+)+)\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css)".*\/>/)
+  const cssMatch = index.match(/https:\/\/[a-zA-Z]+-[a-zA-Z]+\.[a-zA-Z]+-[a-zA-Z]+\.com\/[A-Za-z0-9]+\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css/i);
   if (!cssMatch) {
     throw new Error('CSS file not found')
   }
 
-  const cssURL = cssMatch[1]
+  const cssURL = cssMatch;
 
   const response = await fetch(cssURL)
 
@@ -140,7 +139,7 @@ function formatHTML (html) {
   html = html.substring(0, start) + html.substring(end)
 
   // Remove the style hash
-  html = html.replace(/(?<=<link href="([A-Za-z0-9]+:\/\/[a-zA-Z]+-[A-Za-z0-9]+\.[a-zA-Z]+-[a-zA-Z]+\.[a-zA-Z]+\/([0-9]+([a-zA-Z]+[0-9]+)+)\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css)(?=".*\/>)/, './style.css')
+  html = html.replace(/(?<=<link href=")(.*\/.*\.webflow\.[a-z0-9]+(?:\.min)?\.css)(?=".*\/>)/, './style.css')
 
   return html
 }
