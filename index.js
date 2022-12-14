@@ -86,7 +86,7 @@ async function fetchCSS(index) {
     /https:\/\/[a-zA-Z]+-[a-zA-Z]+\.[a-zA-Z]+-[a-zA-Z]+\.com\/[A-Za-z0-9]+\/css\/[a-zA-Z]+\.[A-Za-z0-9]+\.min\.css/i;
   const cssMatch = htmlPage.match(cssRegex);
   if (!cssMatch) {
-    throw new Error('CSS file not found');
+    throw new Error('CSS not found');
   }
 
   const cssURL = cssMatch;
