@@ -1,6 +1,6 @@
-name: 'Webflow Get'
+name: 'Webflow Get Exporter'
 description: 'Fetch a Webflow site content'
-author: 'Jarek Lipski'
+author: 'Original Author - Jarek Lipski, Forked by Daniel Naumoski for upkeep'
 branding:
   icon: 'globe'
   color: 'blue'
