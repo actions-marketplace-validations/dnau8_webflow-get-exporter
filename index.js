@@ -80,7 +80,7 @@ async function fetchPage (url) {
 }
 
 async function fetchCSS (index) {
-  const cssMatch = index.match(/https:\/\/assets-global.website-files.com\/[a-z0-9]+\/[a-z0-9]+\/.+/)
+  const cssMatch = index.match(/https:\/\/.+.website-files.com\/[a-z0-9]+\/[a-z0-9]+\/.+/)
   if (!cssMatch) {
     throw new Error('CSS file missing')
   }
